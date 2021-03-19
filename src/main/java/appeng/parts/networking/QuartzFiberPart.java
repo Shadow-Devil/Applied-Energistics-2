@@ -42,7 +42,7 @@ import appeng.api.util.AEPartLocation;
 import appeng.core.AppEng;
 import appeng.items.parts.PartModels;
 import appeng.me.GridAccessException;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.parts.AEBasePart;
 import appeng.parts.PartModel;
 
@@ -51,7 +51,7 @@ public class QuartzFiberPart extends AEBasePart implements IEnergyGridProvider {
     @PartModels
     private static final IPartModel MODELS = new PartModel(new ResourceLocation(AppEng.MOD_ID, "part/quartz_fiber"));
 
-    private final AENetworkProxy outerProxy = new AENetworkProxy(this, "outer",
+    private final NetworkProxy outerProxy = NetworkProxy.create(this, "outer",
             this.getProxy().getMachineRepresentation(), true);
 
     public QuartzFiberPart(final ItemStack is) {

@@ -28,7 +28,6 @@ import appeng.api.networking.GridFlags;
 import appeng.api.networking.events.MENetworkChannelsChanged;
 import appeng.api.networking.events.MENetworkEventSubscribe;
 import appeng.api.networking.events.MENetworkPowerStatusChange;
-import appeng.me.GridAccessException;
 
 public abstract class BasicStatePart extends AEBasePart implements IPowerChannelState {
 
@@ -58,7 +57,7 @@ public abstract class BasicStatePart extends AEBasePart implements IPowerChannel
 
         this.setClientFlags(0);
 
-        try {
+        if (this.getProxy().isGridConnected()) {
             if (this.getProxy().getEnergy().isNetworkPowered()) {
                 this.setClientFlags(this.getClientFlags() | POWERED_FLAG);
             }
@@ -68,8 +67,6 @@ public abstract class BasicStatePart extends AEBasePart implements IPowerChannel
             }
 
             this.setClientFlags(this.populateFlags(this.getClientFlags()));
-        } catch (final GridAccessException e) {
-            // meh
         }
 
         data.writeByte((byte) this.getClientFlags());

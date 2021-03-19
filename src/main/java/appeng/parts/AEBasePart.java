@@ -70,7 +70,7 @@ import appeng.fluids.parts.FluidLevelEmitterPart;
 import appeng.fluids.util.AEFluidInventory;
 import appeng.helpers.ICustomNameObject;
 import appeng.helpers.IPriorityHost;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.parts.automation.LevelEmitterPart;
 import appeng.parts.networking.CablePart;
@@ -81,7 +81,7 @@ import appeng.util.SettingsFrom;
 
 public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, IUpgradeableHost, ICustomNameObject {
 
-    private final AENetworkProxy proxy;
+    private final NetworkProxy proxy;
     private final ItemStack is;
     private TileEntity tile = null;
     private IPartHost host = null;
@@ -91,7 +91,7 @@ public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, 
         Preconditions.checkNotNull(is);
 
         this.is = is;
-        this.proxy = new AENetworkProxy(this, "part", is, this instanceof CablePart);
+        this.proxy = NetworkProxy.create(this, "part", is, this instanceof CablePart);
         this.proxy.setValidSides(EnumSet.noneOf(Direction.class));
     }
 
@@ -149,7 +149,7 @@ public abstract class AEBasePart implements IPart, IGridProxyable, IActionHost, 
     }
 
     @Override
-    public AENetworkProxy getProxy() {
+    public NetworkProxy getProxy() {
         return this.proxy;
     }
 

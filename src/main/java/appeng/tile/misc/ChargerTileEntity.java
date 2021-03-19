@@ -47,7 +47,6 @@ import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
 import appeng.core.Api;
 import appeng.core.settings.TickRates;
-import appeng.me.GridAccessException;
 import appeng.tile.grid.AENetworkPowerTileEntity;
 import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.util.Platform;
@@ -139,11 +138,7 @@ public class ChargerTileEntity extends AENetworkPowerTileEntity implements ICran
     @Override
     public void onChangeInventory(final IItemHandler inv, final int slot, final InvOperation mc,
             final ItemStack removed, final ItemStack added) {
-        try {
-            this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-        } catch (final GridAccessException e) {
-            // :P
-        }
+        this.getProxy().wakeDevice();
 
         this.markForUpdate();
     }
@@ -200,11 +195,9 @@ public class ChargerTileEntity extends AENetworkPowerTileEntity implements ICran
                     final double missingAEPower = ps.getAEMaxPower(myItem) - ps.getAECurrentPower(myItem);
                     final double toExtract = Math.min(missingChargeRate, missingAEPower);
 
-                    try {
+                    if (this.getProxy().isGridConnected()) {
                         extractedAmount += this.getProxy().getEnergy().extractAEPower(toExtract, Actionable.MODULATE,
                                 PowerMultiplier.ONE);
-                    } catch (GridAccessException e1) {
-                        // Ignore.
                     }
 
                     if (extractedAmount > 0) {
@@ -231,14 +224,12 @@ public class ChargerTileEntity extends AENetworkPowerTileEntity implements ICran
 
         // charge from the network!
         if (this.getInternalCurrentPower() < POWER_THRESHOLD) {
-            try {
+            if (this.getProxy().isGridConnected()) {
                 final double toExtract = Math.min(800.0, this.getInternalMaxPower() - this.getInternalCurrentPower());
                 final double extracted = this.getProxy().getEnergy().extractAEPower(toExtract, Actionable.MODULATE,
                         PowerMultiplier.ONE);
 
                 this.injectExternalPower(PowerUnits.AE, extracted, Actionable.MODULATE);
-            } catch (final GridAccessException e) {
-                // continue!
             }
 
             changed = true;

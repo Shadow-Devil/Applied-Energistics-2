@@ -205,11 +205,7 @@ public class FluidStorageBusPart extends SharedStorageBusPart
             this.resetCacheLogic = 1;
         }
 
-        try {
-            this.getProxy().getTick().alertDevice(this.getProxy().getNode());
-        } catch (final GridAccessException e) {
-            // :P
-        }
+        this.getProxy().alertDevice();
     }
 
     @Override
@@ -319,16 +315,12 @@ public class FluidStorageBusPart extends SharedStorageBusPart
         }
 
         // update sleep state...
-        if (wasSleeping != (this.monitor == null)) {
-            try {
-                final ITickManager tm = this.getProxy().getTick();
-                if (this.monitor == null) {
-                    tm.sleepDevice(this.getProxy().getNode());
-                } else {
-                    tm.wakeDevice(this.getProxy().getNode());
-                }
-            } catch (final GridAccessException ignore) {
-                // :(
+        boolean shouldSleep = (this.monitor == null);
+        if (wasSleeping != shouldSleep) {
+            if (shouldSleep) {
+                this.getProxy().sleepDevice();
+            } else {
+                this.getProxy().wakeDevice();
             }
         }
 

@@ -81,11 +81,7 @@ class ItemHandlerAdapter implements IMEInventory<IAEItemStack>, IBaseMonitor<IAE
         }
 
         if (type == Actionable.MODULATE) {
-            try {
-                this.proxyable.getProxy().getTick().alertDevice(this.proxyable.getProxy().getNode());
-            } catch (GridAccessException ex) {
-                // meh
-            }
+            this.proxyable.getProxy().alertDevice();
         }
 
         return AEItemStack.fromItemStack(remaining);
@@ -163,11 +159,7 @@ class ItemHandlerAdapter implements IMEInventory<IAEItemStack>, IBaseMonitor<IAE
 
         if (!gathered.isEmpty()) {
             if (mode == Actionable.MODULATE) {
-                try {
-                    this.proxyable.getProxy().getTick().alertDevice(this.proxyable.getProxy().getNode());
-                } catch (GridAccessException ex) {
-                    // meh
-                }
+                this.proxyable.getProxy().alertDevice();
             }
 
             return AEItemStack.fromItemStack(gathered);

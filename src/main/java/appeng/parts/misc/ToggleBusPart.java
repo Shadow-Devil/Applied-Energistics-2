@@ -42,7 +42,7 @@ import appeng.core.Api;
 import appeng.core.AppEng;
 import appeng.helpers.Reflected;
 import appeng.items.parts.PartModels;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.parts.BasicStatePart;
 import appeng.parts.PartModel;
 
@@ -65,7 +65,7 @@ public class ToggleBusPart extends BasicStatePart {
     public static final IPartModel MODELS_HAS_CHANNEL = new PartModel(MODEL_BASE, MODEL_STATUS_HAS_CHANNEL);
 
     private static final int REDSTONE_FLAG = 4;
-    private final AENetworkProxy outerProxy = new AENetworkProxy(this, "outer", ItemStack.EMPTY, true);
+    private final NetworkProxy outerProxy = NetworkProxy.create(this, "outer", ItemStack.EMPTY, true);
     private IGridConnection connection;
     private boolean hasRedstone = false;
 
@@ -182,7 +182,7 @@ public class ToggleBusPart extends BasicStatePart {
         }
     }
 
-    AENetworkProxy getOuterProxy() {
+    NetworkProxy getOuterProxy() {
         return this.outerProxy;
     }
 

@@ -39,7 +39,7 @@ import appeng.me.GridAccessException;
 import appeng.me.cluster.IAEMultiBlock;
 import appeng.me.cluster.implementations.SpatialPylonCalculator;
 import appeng.me.cluster.implementations.SpatialPylonCluster;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.me.helpers.AENetworkProxyMultiblock;
 import appeng.tile.grid.AENetworkTileEntity;
 
@@ -75,7 +75,7 @@ public class SpatialPylonTileEntity extends AENetworkTileEntity implements IAEMu
     }
 
     @Override
-    protected AENetworkProxy createProxy() {
+    protected NetworkProxy createProxy() {
         return new AENetworkProxyMultiblock(this, "proxy", this.getItemFromTile(this), true);
     }
 

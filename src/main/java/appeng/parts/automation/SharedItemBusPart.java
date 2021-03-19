@@ -132,14 +132,10 @@ public abstract class SharedItemBusPart extends UpgradeablePart implements IGrid
     }
 
     private void updateState() {
-        try {
-            if (!this.isSleeping()) {
-                this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-            } else {
-                this.getProxy().getTick().sleepDevice(this.getProxy().getNode());
-            }
-        } catch (final GridAccessException e) {
-            // :P
+        if (!this.isSleeping()) {
+            this.getProxy().wakeDevice();
+        } else {
+            this.getProxy().sleepDevice();
         }
     }
 

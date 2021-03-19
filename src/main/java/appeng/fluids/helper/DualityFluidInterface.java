@@ -20,6 +20,7 @@ package appeng.fluids.helper;
 
 import java.util.Optional;
 
+import appeng.me.helpers.NetworkProxy;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -65,7 +66,6 @@ import appeng.fluids.util.AEFluidInventory;
 import appeng.fluids.util.IAEFluidInventory;
 import appeng.fluids.util.IAEFluidTank;
 import appeng.me.GridAccessException;
-import appeng.me.helpers.AENetworkProxy;
 import appeng.me.helpers.MachineSource;
 import appeng.me.storage.MEMonitorIFluidHandler;
 import appeng.me.storage.MEMonitorPassThrough;
@@ -81,7 +81,7 @@ public class DualityFluidInterface
     public static final int TANK_CAPACITY = FluidAttributes.BUCKET_VOLUME * 4;
 
     private final ConfigManager cm = new ConfigManager(this);
-    private final AENetworkProxy gridProxy;
+    private final NetworkProxy gridProxy;
     private final IFluidInterfaceHost iHost;
     private final IActionSource mySource;
     private final IActionSource interfaceRequestSource;
@@ -98,7 +98,7 @@ public class DualityFluidInterface
     private final MEMonitorPassThrough<IAEFluidStack> fluids = new MEMonitorPassThrough<>(
             new NullInventory<IAEFluidStack>(), Api.instance().storage().getStorageChannel(IFluidStorageChannel.class));
 
-    public DualityFluidInterface(final AENetworkProxy networkProxy, final IFluidInterfaceHost ih) {
+    public DualityFluidInterface(final NetworkProxy networkProxy, final IFluidInterfaceHost ih) {
         this.gridProxy = networkProxy;
         this.gridProxy.setFlags(GridFlags.REQUIRE_CHANNEL);
         this.iHost = ih;
@@ -171,11 +171,7 @@ public class DualityFluidInterface
 
     public void notifyNeighbors() {
         if (this.gridProxy.isActive()) {
-            try {
-                this.gridProxy.getTick().wakeDevice(this.gridProxy.getNode());
-            } catch (final GridAccessException e) {
-                // :P
-            }
+            this.gridProxy.wakeDevice();
         }
 
         final TileEntity te = this.iHost.getTileEntity();
@@ -185,14 +181,14 @@ public class DualityFluidInterface
     }
 
     public void gridChanged() {
-        try {
+        if (this.gridProxy.isGridConnected()) {
             this.items.setInternal(this.gridProxy.getStorage()
                     .getInventory(Api.instance().storage().getStorageChannel(IItemStorageChannel.class)));
             this.fluids.setInternal(this.gridProxy.getStorage()
                     .getInventory(Api.instance().storage().getStorageChannel(IFluidStorageChannel.class)));
-        } catch (final GridAccessException gae) {
-            this.items.setInternal(new NullInventory<IAEItemStack>());
-            this.fluids.setInternal(new NullInventory<IAEFluidStack>());
+        } else {
+            this.items.setInternal(new NullInventory<>());
+            this.fluids.setInternal(new NullInventory<>());
         }
 
         this.notifyNeighbors();
@@ -239,14 +235,10 @@ public class DualityFluidInterface
         final boolean has = this.hasWorkToDo();
 
         if (had != has) {
-            try {
-                if (has) {
-                    this.gridProxy.getTick().alertDevice(this.gridProxy.getNode());
-                } else {
-                    this.gridProxy.getTick().sleepDevice(this.gridProxy.getNode());
-                }
-            } catch (final GridAccessException e) {
-                // :P
+            if (has) {
+                this.gridProxy.alertDevice();
+            } else {
+                this.gridProxy.sleepDevice();
             }
         }
 
@@ -311,7 +303,7 @@ public class DualityFluidInterface
         this.isWorking = slot;
 
         boolean changed = false;
-        try {
+        if (this.gridProxy.isGridConnected()) {
             final IMEInventory<IAEFluidStack> dest = this.gridProxy.getStorage()
                     .getInventory(Api.instance().storage().getStorageChannel(IFluidStorageChannel.class));
             final IEnergySource src = this.gridProxy.getEnergy();
@@ -353,8 +345,6 @@ public class DualityFluidInterface
                     }
                 }
             }
-        } catch (final GridAccessException e) {
-            // :P
         }
 
         if (changed) {
@@ -383,14 +373,10 @@ public class DualityFluidInterface
             final boolean now = this.hasWorkToDo();
 
             if (had != now) {
-                try {
-                    if (now) {
-                        this.gridProxy.getTick().alertDevice(this.gridProxy.getNode());
-                    } else {
-                        this.gridProxy.getTick().sleepDevice(this.gridProxy.getNode());
-                    }
-                } catch (final GridAccessException e) {
-                    // :P
+                if (now) {
+                    this.gridProxy.alertDevice();
+                } else {
+                    this.gridProxy.sleepDevice();
                 }
             }
         }

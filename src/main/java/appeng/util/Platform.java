@@ -72,7 +72,6 @@ import appeng.api.config.SecurityPermissions;
 import appeng.api.config.SortOrder;
 import appeng.api.definitions.IItemDefinition;
 import appeng.api.definitions.IMaterials;
-import appeng.api.exceptions.AppEngException;
 import appeng.api.features.AEFeature;
 import appeng.api.implementations.items.IAEItemPowerStorage;
 import appeng.api.networking.IGrid;
@@ -102,7 +101,7 @@ import appeng.hooks.ticking.TickHandler;
 import appeng.integration.abstraction.JEIFacade;
 import appeng.me.GridAccessException;
 import appeng.me.GridNode;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.util.helpers.ItemComparisonHelper;
 import appeng.util.helpers.P2PHelper;
 import appeng.util.item.AEItemStack;
@@ -887,7 +886,7 @@ public class Platform {
                 yaw, pitch);
     }
 
-    public static boolean canAccess(final AENetworkProxy gridProxy, final IActionSource src) {
+    public static boolean canAccess(final NetworkProxy gridProxy, final IActionSource src) {
         try {
             if (src.player().isPresent()) {
                 return gridProxy.getSecurity().hasPermission(src.player().get(), SecurityPermissions.BUILD);

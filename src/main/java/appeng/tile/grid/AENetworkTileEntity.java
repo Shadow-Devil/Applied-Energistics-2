@@ -27,13 +27,13 @@ import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.tile.AEBaseTileEntity;
 
 public class AENetworkTileEntity extends AEBaseTileEntity implements IActionHost, IGridProxyable {
 
-    private final AENetworkProxy gridProxy = this.createProxy();
+    private final NetworkProxy gridProxy = this.createProxy();
 
     public AENetworkTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -52,8 +52,8 @@ public class AENetworkTileEntity extends AEBaseTileEntity implements IActionHost
         return data;
     }
 
-    protected AENetworkProxy createProxy() {
-        return new AENetworkProxy(this, "proxy", this.getItemFromTile(this), true);
+    protected NetworkProxy createProxy() {
+        return NetworkProxy.create(this, "proxy", this.getItemFromTile(this), true);
     }
 
     @Override
@@ -85,13 +85,7 @@ public class AENetworkTileEntity extends AEBaseTileEntity implements IActionHost
     }
 
     @Override
-    public void validate() {
-        super.validate();
-        this.getProxy().validate();
-    }
-
-    @Override
-    public AENetworkProxy getProxy() {
+    public NetworkProxy getProxy() {
         return this.gridProxy;
     }
 

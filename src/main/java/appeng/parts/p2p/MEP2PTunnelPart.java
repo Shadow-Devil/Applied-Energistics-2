@@ -47,7 +47,7 @@ import appeng.items.parts.PartModels;
 import appeng.me.GridAccessException;
 import appeng.me.cache.helpers.Connections;
 import appeng.me.cache.helpers.TunnelConnection;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 
 public class MEP2PTunnelPart extends P2PTunnelPart<MEP2PTunnelPart> implements IGridTickable {
 
@@ -59,7 +59,7 @@ public class MEP2PTunnelPart extends P2PTunnelPart<MEP2PTunnelPart> implements I
     }
 
     private final Connections connection = new Connections(this);
-    private final AENetworkProxy outerProxy = new AENetworkProxy(this, "outer", ItemStack.EMPTY, true);
+    private final NetworkProxy outerProxy = NetworkProxy.create(this, "outer", ItemStack.EMPTY, true);
 
     public MEP2PTunnelPart(final ItemStack is) {
         super(is);
@@ -88,11 +88,7 @@ public class MEP2PTunnelPart extends P2PTunnelPart<MEP2PTunnelPart> implements I
     public void onTunnelNetworkChange() {
         super.onTunnelNetworkChange();
         if (!this.isOutput()) {
-            try {
-                this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-            } catch (final GridAccessException e) {
-                // :P
-            }
+            this.getProxy().wakeDevice();
         }
     }
 

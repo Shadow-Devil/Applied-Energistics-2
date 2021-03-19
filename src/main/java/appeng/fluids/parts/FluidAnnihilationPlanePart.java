@@ -62,7 +62,6 @@ import appeng.core.settings.TickRates;
 import appeng.core.sync.packets.BlockTransitionEffectPacket;
 import appeng.fluids.util.AEFluidStack;
 import appeng.items.parts.PartModels;
-import appeng.me.GridAccessException;
 import appeng.me.helpers.MachineSource;
 import appeng.parts.BasicStatePart;
 import appeng.parts.automation.PlaneConnectionHelper;
@@ -104,7 +103,7 @@ public class FluidAnnihilationPlanePart extends BasicStatePart implements IGridT
     @Override
     public void onNeighborChanged(IBlockReader w, BlockPos pos, BlockPos neighbor) {
         if (pos.offset(this.getSide().getFacing()).equals(neighbor)) {
-            this.refresh();
+            this.getProxy().alertDevice();
         } else {
             connectionHelper.updateConnections();
         }
@@ -115,25 +114,17 @@ public class FluidAnnihilationPlanePart extends BasicStatePart implements IGridT
         return 1;
     }
 
-    private void refresh() {
-        try {
-            this.getProxy().getTick().alertDevice(this.getProxy().getNode());
-        } catch (final GridAccessException e) {
-            // :P
-        }
-    }
-
     @Override
     @MENetworkEventSubscribe
     public void chanRender(final MENetworkChannelsChanged c) {
-        this.refresh();
+        this.getProxy().alertDevice();
         this.getHost().markForUpdate();
     }
 
     @Override
     @MENetworkEventSubscribe
     public void powerRender(final MENetworkPowerStatusChange c) {
-        this.refresh();
+        this.getProxy().alertDevice();
         this.getHost().markForUpdate();
     }
 
@@ -194,7 +185,7 @@ public class FluidAnnihilationPlanePart extends BasicStatePart implements IGridT
     }
 
     private boolean storeFluid(IAEFluidStack stack, boolean modulate) {
-        try {
+        if (this.getProxy().isGridConnected()) {
             final IStorageGrid storage = this.getProxy().getStorage();
             final IMEInventory<IAEFluidStack> inv = storage
                     .getInventory(Api.instance().storage().getStorageChannel(IFluidStorageChannel.class));
@@ -212,8 +203,6 @@ public class FluidAnnihilationPlanePart extends BasicStatePart implements IGridT
                 final IAEFluidStack leftOver = inv.injectItems(stack, Actionable.SIMULATE, this.mySrc);
                 return leftOver == null || leftOver.getStackSize() == 0;
             }
-        } catch (final GridAccessException e) {
-            // :P
         }
         return false;
     }

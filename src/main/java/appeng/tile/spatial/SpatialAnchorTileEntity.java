@@ -59,7 +59,6 @@ import appeng.api.util.IConfigManager;
 import appeng.api.util.IConfigurableObject;
 import appeng.client.render.overlay.IOverlayDataSource;
 import appeng.client.render.overlay.OverlayManager;
-import appeng.me.GridAccessException;
 import appeng.services.ChunkLoadingService;
 import appeng.tile.grid.AENetworkTileEntity;
 import appeng.util.ConfigManager;
@@ -222,11 +221,7 @@ public class SpatialAnchorTileEntity extends AENetworkTileEntity
 
     private void wakeUp() {
         // Wake the anchor to allow for unloading chunks some time after power loss
-        try {
-            this.getProxy().getTick().alertDevice(this.getProxy().getNode());
-        } catch (GridAccessException e) {
-            // Can be ignored
-        }
+        this.getProxy().alertDevice();
     }
 
     @Override
@@ -305,28 +300,28 @@ public class SpatialAnchorTileEntity extends AENetworkTileEntity
      * network.
      */
     private void cleanUp() {
-        try {
-            Multiset<ChunkPos> requiredChunks = this.getProxy().getStatistics().getChunks().get(this.getServerWorld());
-
-            // Release all chunks, which are no longer part of the network.s
-            for (Iterator<ChunkPos> iterator = chunks.iterator(); iterator.hasNext();) {
-                ChunkPos chunkPos = iterator.next();
-
-                if (!requiredChunks.contains(chunkPos)) {
-                    this.release(chunkPos, false);
-                    iterator.remove();
-                }
-            }
-
-            // Force missing chunks
-            for (ChunkPos chunkPos : requiredChunks) {
-                if (!this.chunks.contains(chunkPos)) {
-                    this.force(chunkPos);
-                }
-            }
-        } catch (GridAccessException e) {
+        if (!this.getProxy().isGridConnected()) {
+            return;
         }
 
+        Multiset<ChunkPos> requiredChunks = this.getProxy().getStatistics().getChunks().get(this.getServerWorld());
+
+        // Release all chunks, which are no longer part of the network.s
+        for (Iterator<ChunkPos> iterator = chunks.iterator(); iterator.hasNext();) {
+            ChunkPos chunkPos = iterator.next();
+
+            if (!requiredChunks.contains(chunkPos)) {
+                this.release(chunkPos, false);
+                iterator.remove();
+            }
+        }
+
+        // Force missing chunks
+        for (ChunkPos chunkPos : requiredChunks) {
+            if (!this.chunks.contains(chunkPos)) {
+                this.force(chunkPos);
+            }
+        }
     }
 
     /**
@@ -366,12 +361,11 @@ public class SpatialAnchorTileEntity extends AENetworkTileEntity
     }
 
     private void forceAll() {
-        try {
+        if (this.getProxy().isGridConnected()) {
             for (ChunkPos chunkPos : this.getProxy().getStatistics().getChunks().get(this.getServerWorld())
                     .elementSet()) {
                 this.force(chunkPos);
             }
-        } catch (GridAccessException e) {
         }
     }
 

@@ -29,7 +29,7 @@ import appeng.me.cluster.IAEMultiBlock;
 import appeng.util.iterators.ChainedIterator;
 import appeng.util.iterators.ProxyNodeIterator;
 
-public class AENetworkProxyMultiblock extends AENetworkProxy implements IGridMultiblock {
+public class AENetworkProxyMultiblock extends ServerNetworkProxy implements IGridMultiblock {
 
     public AENetworkProxyMultiblock(final IGridProxyable te, final String nbtName, final ItemStack itemStack,
             final boolean inWorld) {

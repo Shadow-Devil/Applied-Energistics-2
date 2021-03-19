@@ -25,12 +25,12 @@ import net.minecraft.util.Direction;
 
 import appeng.api.networking.IGridNode;
 import appeng.api.util.AEPartLocation;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.tile.grid.AENetworkTileEntity;
 
 public class PhantomNodeTileEntity extends AENetworkTileEntity {
 
-    private AENetworkProxy proxy = null;
+    private NetworkProxy proxy = null;
     private boolean crashMode = false;
 
     public PhantomNodeTileEntity(TileEntityType<?> tileEntityTypeIn) {

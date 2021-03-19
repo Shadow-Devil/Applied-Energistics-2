@@ -77,11 +77,7 @@ public class FluidHandlerAdapter implements IMEInventory<IAEFluidStack>, IBaseMo
         }
 
         if (type == Actionable.MODULATE) {
-            try {
-                this.proxyable.getProxy().getTick().alertDevice(this.proxyable.getProxy().getNode());
-            } catch (GridAccessException ignore) {
-                // meh
-            }
+            this.proxyable.getProxy().alertDevice();
         }
 
         fluidStack.setAmount(remaining);
@@ -101,11 +97,7 @@ public class FluidHandlerAdapter implements IMEInventory<IAEFluidStack>, IBaseMo
         }
 
         if (mode == Actionable.MODULATE) {
-            try {
-                this.proxyable.getProxy().getTick().alertDevice(this.proxyable.getProxy().getNode());
-            } catch (GridAccessException ignore) {
-                // meh
-            }
+            this.proxyable.getProxy().alertDevice();
         }
         return AEFluidStack.fromFluidStack(gathered);
     }

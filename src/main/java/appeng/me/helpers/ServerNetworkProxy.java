@@ -34,31 +34,19 @@ import net.minecraft.util.Direction;
 import appeng.api.networking.GridFlags;
 import appeng.api.networking.GridNotification;
 import appeng.api.networking.IGrid;
-import appeng.api.networking.IGridBlock;
-import appeng.api.networking.IGridCache;
 import appeng.api.networking.IGridHost;
 import appeng.api.networking.IGridNode;
-import appeng.api.networking.crafting.ICraftingGrid;
-import appeng.api.networking.energy.IEnergyGrid;
 import appeng.api.networking.events.MENetworkPowerIdleChange;
-import appeng.api.networking.pathing.IPathingGrid;
-import appeng.api.networking.security.ISecurityGrid;
-import appeng.api.networking.storage.IStorageGrid;
-import appeng.api.networking.ticking.ITickManager;
 import appeng.api.util.AEColor;
 import appeng.api.util.DimensionalCoord;
 import appeng.api.util.IOrientable;
 import appeng.core.Api;
 import appeng.core.worlddata.WorldData;
 import appeng.hooks.ticking.TickHandler;
-import appeng.me.GridAccessException;
-import appeng.me.cache.P2PCache;
-import appeng.me.cache.StatisticsCache;
 import appeng.parts.networking.CablePart;
 import appeng.tile.AEBaseTileEntity;
-import appeng.util.Platform;
 
-public class AENetworkProxy implements IGridBlock {
+class ServerNetworkProxy implements NetworkProxy {
 
     private final IGridProxyable gp;
     private final boolean isWorldAccessible;
@@ -73,7 +61,7 @@ public class AENetworkProxy implements IGridBlock {
     private double idleDraw = 1.0;
     private PlayerEntity owner;
 
-    public AENetworkProxy(final IGridProxyable te, final String nbtName, final ItemStack visual,
+    ServerNetworkProxy(final IGridProxyable te, final String nbtName, final ItemStack visual,
             final boolean inWorld) {
         this.gp = Objects.requireNonNull(te);
         this.nbtName = Objects.requireNonNull(nbtName);
@@ -105,7 +93,6 @@ public class AENetworkProxy implements IGridBlock {
     }
 
     public void onChunkUnloaded() {
-        this.isReady = false;
         this.remove();
     }
 
@@ -132,7 +119,7 @@ public class AENetworkProxy implements IGridBlock {
     }
 
     public IGridNode getNode() {
-        if (this.node == null && Platform.isServer() && this.isReady) {
+        if (this.node == null && !this.gp.isRemote() && this.isReady) {
             this.node = Api.instance().grid().createGridNode(this);
             this.readFromNBT(this.data);
             this.node.updateState();
@@ -222,15 +209,7 @@ public class AENetworkProxy implements IGridBlock {
 
     public void setIdlePowerUsage(final double idle) {
         this.idleDraw = idle;
-
-        if (this.node != null) {
-            try {
-                final IGrid g = this.getGrid();
-                g.postEvent(new MENetworkPowerIdleChange(this.node));
-            } catch (final GridAccessException e) {
-                // not ready for this yet..
-            }
-        }
+        tryPostEvent(new MENetworkPowerIdleChange(this.node));
     }
 
     public boolean isReady() {
@@ -246,11 +225,7 @@ public class AENetworkProxy implements IGridBlock {
     }
 
     public boolean isPowered() {
-        try {
-            return this.getEnergy().isNetworkPowered();
-        } catch (final GridAccessException e) {
-            return false;
-        }
+        return this.getEnergy().isNetworkPowered();
     }
 
     public void setOwner(final PlayerEntity player) {
@@ -269,62 +244,18 @@ public class AENetworkProxy implements IGridBlock {
      * short cut!
      *
      * @return grid of node
-     * @throws GridAccessException of node or grid is null
+     * @throws IllegalStateException of node or grid is null
      */
     @Nonnull
-    public IGrid getGrid() throws GridAccessException {
+    public IGrid getGrid() {
         if (this.node == null) {
-            throw new GridAccessException();
+            throw new IllegalStateException("Node hasn't been created yet");
         }
         final IGrid grid = this.node.getGrid();
         if (grid == null) {
-            throw new GridAccessException();
+            throw new IllegalStateException("Grid hasn't been created yet");
         }
         return grid;
     }
 
-    @Nonnull
-    public IPathingGrid getPath() throws GridAccessException {
-        return this.getGridCache(IPathingGrid.class);
-    }
-
-    @Nonnull
-    public ITickManager getTick() throws GridAccessException {
-        return this.getGridCache(ITickManager.class);
-    }
-
-    @Nonnull
-    public IStorageGrid getStorage() throws GridAccessException {
-        return this.getGridCache(IStorageGrid.class);
-    }
-
-    @Nonnull
-    public P2PCache getP2P() throws GridAccessException {
-        return this.getGridCache(P2PCache.class);
-    }
-
-    @Nonnull
-    public ISecurityGrid getSecurity() throws GridAccessException {
-        return this.getGridCache(ISecurityGrid.class);
-    }
-
-    @Nonnull
-    public ICraftingGrid getCrafting() throws GridAccessException {
-        return this.getGridCache(ICraftingGrid.class);
-    }
-
-    @Nonnull
-    public StatisticsCache getStatistics() throws GridAccessException {
-        return this.getGridCache(StatisticsCache.class);
-    }
-
-    @Nonnull
-    public IEnergyGrid getEnergy() throws GridAccessException {
-        return this.getGridCache(IEnergyGrid.class);
-    }
-
-    @Nonnull
-    private <T extends IGridCache> T getGridCache(Class<T> clazz) throws GridAccessException {
-        return this.getGrid().getCache(clazz);
-    }
 }

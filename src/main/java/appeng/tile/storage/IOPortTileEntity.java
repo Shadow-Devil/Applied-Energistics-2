@@ -141,14 +141,10 @@ public class IOPortTileEntity extends AENetworkInvTileEntity
     }
 
     private void updateTask() {
-        try {
-            if (this.hasWork()) {
-                this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-            } else {
-                this.getProxy().getTick().sleepDevice(this.getProxy().getNode());
-            }
-        } catch (final GridAccessException e) {
-            // :P
+        if (this.hasWork()) {
+            this.getProxy().wakeDevice();
+        } else {
+            this.getProxy().sleepDevice();
         }
     }
 

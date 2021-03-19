@@ -23,12 +23,14 @@ import appeng.api.util.DimensionalCoord;
 
 public interface IGridProxyable extends IGridHost {
 
-    AENetworkProxy getProxy();
+    NetworkProxy getProxy();
 
     DimensionalCoord getLocation();
 
     void gridChanged();
 
     void saveChanges();
+
+    boolean isRemote();
 
 }

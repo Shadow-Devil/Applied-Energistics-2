@@ -51,7 +51,12 @@ public final class GridCacheRegistry implements IGridCacheRegistry {
         final Map<Class<? extends IGridCache>, IGridCache> map = new HashMap<>(registry.size());
 
         for (GridCacheRegistration<?> registration : registry) {
-            map.put(registration.cacheClass, registration.factory.createCache(g));
+            IGridCache cache = registration.factory.createCache(g);
+            if (cache == null) {
+                throw new IllegalStateException("IGridCacheFactory for " + registration.cacheClass
+                        + " returned null");
+            }
+            map.put(registration.cacheClass, cache);
         }
 
         return map;

@@ -25,13 +25,13 @@ import net.minecraft.tileentity.TileEntityType;
 import appeng.api.networking.IGridNode;
 import appeng.api.networking.security.IActionHost;
 import appeng.api.util.AEPartLocation;
-import appeng.me.helpers.AENetworkProxy;
+import appeng.me.helpers.NetworkProxy;
 import appeng.me.helpers.IGridProxyable;
 import appeng.tile.AEBaseInvTileEntity;
 
 public abstract class AENetworkInvTileEntity extends AEBaseInvTileEntity implements IActionHost, IGridProxyable {
 
-    private final AENetworkProxy gridProxy = new AENetworkProxy(this, "proxy", this.getItemFromTile(this), true);
+    private final NetworkProxy gridProxy = NetworkProxy.create(this, "proxy", this.getItemFromTile(this), true);
 
     public AENetworkInvTileEntity(TileEntityType<?> tileEntityTypeIn) {
         super(tileEntityTypeIn);
@@ -51,7 +51,7 @@ public abstract class AENetworkInvTileEntity extends AEBaseInvTileEntity impleme
     }
 
     @Override
-    public AENetworkProxy getProxy() {
+    public NetworkProxy getProxy() {
         return this.gridProxy;
     }
 
@@ -85,12 +85,6 @@ public abstract class AENetworkInvTileEntity extends AEBaseInvTileEntity impleme
         // and cause the block state to be changed back to non-air
         updateContainingBlockInfo();
         this.getProxy().remove();
-    }
-
-    @Override
-    public void validate() {
-        super.validate();
-        this.getProxy().validate();
     }
 
     @Override

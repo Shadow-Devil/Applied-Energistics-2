@@ -42,7 +42,6 @@ import appeng.api.util.AECableType;
 import appeng.api.util.AEPartLocation;
 import appeng.api.util.DimensionalCoord;
 import appeng.core.settings.TickRates;
-import appeng.me.GridAccessException;
 import appeng.tile.grid.AENetworkInvTileEntity;
 import appeng.tile.inventory.AppEngInternalInventory;
 import appeng.util.Platform;
@@ -124,11 +123,7 @@ public class VibrationChamberTileEntity extends AENetworkInvTileEntity implement
             final ItemStack removed, final ItemStack added) {
         if (this.getBurnTime() <= 0) {
             if (this.canEatFuel()) {
-                try {
-                    this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-                } catch (final GridAccessException e) {
-                    // wake up!
-                }
+                this.getProxy().wakeDevice();
             }
         }
     }
@@ -182,7 +177,7 @@ public class VibrationChamberTileEntity extends AENetworkInvTileEntity implement
             this.setBurnTime(0);
         }
 
-        try {
+        if (this.getProxy().isGridConnected()) {
             final IEnergyGrid grid = this.getProxy().getEnergy();
             final double newPower = timePassed * POWER_PER_TICK;
             final double overFlow = grid.injectPower(newPower, Actionable.SIMULATE);
@@ -198,7 +193,7 @@ public class VibrationChamberTileEntity extends AENetworkInvTileEntity implement
 
             this.setBurnSpeed(Math.max(MIN_BURN_SPEED, Math.min(this.getBurnSpeed(), MAX_BURN_SPEED)));
             return overFlow > 0 ? TickRateModulation.SLOWER : TickRateModulation.FASTER;
-        } catch (final GridAccessException e) {
+        } else {
             this.setBurnSpeed(this.getBurnSpeed() - ticksSinceLastCall);
             this.setBurnSpeed(Math.max(MIN_BURN_SPEED, Math.min(this.getBurnSpeed(), MAX_BURN_SPEED)));
             return TickRateModulation.SLOWER;
@@ -226,11 +221,7 @@ public class VibrationChamberTileEntity extends AENetworkInvTileEntity implement
         }
 
         if (this.getBurnTime() > 0) {
-            try {
-                this.getProxy().getTick().wakeDevice(this.getProxy().getNode());
-            } catch (final GridAccessException e) {
-                // gah!
-            }
+            this.getProxy().wakeDevice();
         }
 
         // state change

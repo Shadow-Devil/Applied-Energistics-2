@@ -20,6 +20,7 @@ package appeng.tile.networking;
 
 import java.util.EnumSet;
 
+import appeng.api.networking.IGrid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
@@ -96,22 +97,17 @@ public class ControllerTileEntity extends AENetworkPowerTileEntity {
     }
 
     private void updateMeta() {
-        if (!this.getProxy().isReady()) {
-            return;
-        }
-
         ControllerBlockState metaState = ControllerBlockState.offline;
 
-        try {
-            if (this.getProxy().getEnergy().isNetworkPowered()) {
+        IGrid grid = this.getProxy().tryGetGrid();
+        if (grid != null) {
+            if (grid.getEnergyGrid().isNetworkPowered()) {
                 metaState = ControllerBlockState.online;
 
-                if (this.getProxy().getPath().getControllerState() == ControllerState.CONTROLLER_CONFLICT) {
+                if (grid.getPathingGrid().getControllerState() == ControllerState.CONTROLLER_CONFLICT) {
                     metaState = ControllerBlockState.conflicted;
                 }
             }
-        } catch (final GridAccessException e) {
-            metaState = ControllerBlockState.offline;
         }
 
         if (this.checkController(this.pos)
@@ -124,11 +120,9 @@ public class ControllerTileEntity extends AENetworkPowerTileEntity {
 
     @Override
     protected double getFunnelPowerDemand(final double maxReceived) {
-        try {
-            final IEnergyGrid grid = this.getProxy().getEnergy();
-
-            return grid.getEnergyDemand(maxReceived);
-        } catch (final GridAccessException e) {
+        if (getProxy().isGridConnected()) {
+            return getProxy().getEnergy().getEnergyDemand(maxReceived);
+        } else {
             // no grid? use local...
             return super.getFunnelPowerDemand(maxReceived);
         }
@@ -136,12 +130,12 @@ public class ControllerTileEntity extends AENetworkPowerTileEntity {
 
     @Override
     protected double funnelPowerIntoStorage(final double power, final Actionable mode) {
-        try {
+        if (this.getProxy().isGridConnected()) {
             final IEnergyGrid grid = this.getProxy().getEnergy();
             final double leftOver = grid.injectPower(power, mode);
 
             return leftOver;
-        } catch (final GridAccessException e) {
+        } else {
             // no grid? use local...
             return super.funnelPowerIntoStorage(power, mode);
         }
@@ -149,11 +143,7 @@ public class ControllerTileEntity extends AENetworkPowerTileEntity {
 
     @Override
     protected void PowerEvent(final PowerEventType x) {
-        try {
-            this.getProxy().getGrid().postEvent(new MENetworkPowerStorage(this, x));
-        } catch (final GridAccessException e) {
-            // not ready!
-        }
+        this.getProxy().tryPostEvent(new MENetworkPowerStorage(this, x));
     }
 
     @MENetworkEventSubscribe

@@ -25,7 +25,13 @@ package appeng.api.networking;
 
 import javax.annotation.Nonnull;
 
+import appeng.api.networking.crafting.ICraftingGrid;
+import appeng.api.networking.energy.IEnergyGrid;
 import appeng.api.networking.events.MENetworkEvent;
+import appeng.api.networking.pathing.IPathingGrid;
+import appeng.api.networking.security.ISecurityGrid;
+import appeng.api.networking.storage.IStorageGrid;
+import appeng.api.networking.ticking.ITickManager;
 import appeng.api.util.IReadOnlyCollection;
 
 /**
@@ -100,4 +106,35 @@ public interface IGrid {
      */
     @Nonnull
     IGridNode getPivot();
+
+    @Nonnull
+    default IPathingGrid getPathingGrid() {
+        return this.getCache(IPathingGrid.class);
+    }
+
+    @Nonnull
+    default ITickManager getTickManager() {
+        return this.getCache(ITickManager.class);
+    }
+
+    @Nonnull
+    default IStorageGrid getStorageGrid() {
+        return this.getCache(IStorageGrid.class);
+    }
+
+    @Nonnull
+    default ISecurityGrid getSecurityGrid() {
+        return this.getCache(ISecurityGrid.class);
+    }
+
+    @Nonnull
+    default ICraftingGrid getCraftingGrid() {
+        return this.getCache(ICraftingGrid.class);
+    }
+
+    @Nonnull
+    default IEnergyGrid getEnergyGrid() {
+        return this.getCache(IEnergyGrid.class);
+    }
+
 }

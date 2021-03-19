@@ -158,6 +158,14 @@ public class AEBaseTileEntity extends TileEntity implements IOrientable, ICommon
         }
     }
 
+    @Override
+    public void validate() {
+        super.validate();
+        // This delays calling onReady until the chunk starts ticking,
+        // This works even for non-ticking tile entities
+        TickHandler.instance().addInit(this);
+    }
+
     public void onReady() {
     }
 
